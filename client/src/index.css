@@ -1,0 +1,88 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background: #000;
+  color: white;
+}
+
+.text_color {
+  color: #676767;
+}
+
+.orange_btn {
+  @apply rounded-full border border-orange-400 bg-orange-400 py-1.5 px-5 text-black transition-all hover:bg-transparent hover:text-orange-400 text-center text-sm flex items-center justify-center;
+}
+
+.green_gradient {
+  @apply bg-gradient-to-r from-green-500 via-green-600 to-orange-500 bg-clip-text text-transparent;
+}
+
+.bg_green_gradient {
+  @apply bg-gradient-to-r from-green-400 to-green-700;
+}
+
+.blue_gradient {
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600 bg-clip-text text-transparent;
+}
+
+.bg_orange_gradient {
+  @apply bg-gradient-to-r from-amber-500 via-orange-600 to-yellow-500;
+}
+
+.bg_yellow_gradient {
+  @apply bg-gradient-to-r from-amber-500 to-orange-600;
+}
+
+.bg_green_gradient {
+  @apply bg-gradient-to-r from-green-400 to-green-500;
+}
+
+.bg_blue_gradient {
+  @apply bg-gradient-to-r from-blue-600 to-cyan-600;
+}
+
+.desc {
+  @apply mt-5 text-lg text-gray-600 sm:text-xl max-w-2xl;
+}
+
+.flex-center {
+  @apply flex justify-center items-center;
+}
+
+.flex-start {
+  @apply flex justify-start items-start;
+}
+
+.flex-end {
+  @apply flex justify-end items-center;
+}
+
+.flex-between {
+  @apply flex justify-between items-center;
+}
+
+/* banner frame effect */
+.framed {
+  box-shadow: -50px -50px 0 -40px #ec640c, 50px 50px 0 -40px #f49b0b;
+}
+
+/* floating animation */
+
+.float_animation {
+  animation: float 3s infinite;
+}
+@keyframes float {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}

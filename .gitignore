@@ -1,0 +1,33 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build and output directories
+/build
+/.next
+/out
+
+# Dependency directories
+/.pnp
+.pnp.js
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE-specific files
+.vscode/
+.idea/
+
+# macOS-specific files
+.DS_Store
+
+# Testing coverage
+/coverage
+
+# Compiled TypeScript files
+*.tsbuildinfo

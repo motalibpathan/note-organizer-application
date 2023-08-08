@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Modal from "./Model";
 import NoteCard from "./NoteCard";
 import NoteForm from "./NoteForm";
@@ -11,38 +11,32 @@ export interface Note {
   photos: Array<{ filename: string; originalName: string }> | [];
 }
 
-const NoteList = () => {
-  const [noteList, setNoteList] = useState<Note[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(true);
+interface NoteListProps {
+  notes: Note[];
+  setNotes: React.Dispatch<React.SetStateAction<Note[]>>;
+  loading: boolean;
+  error: string | null;
+}
+
+const NoteList: React.FC<NoteListProps> = ({ notes, setNotes }) => {
+  console.log("🚀 ~ file: NoteList.tsx:20 ~ NoteList ~ setNotes:", setNotes);
+  console.log("🚀 ~ file: NoteList.tsx:20 ~ NoteList ~ notes:", notes);
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
-
-  const fetchNoteList = async () => {
-    try {
-      const response = await fetch("/api/notes");
-      const data = await response.json();
-      if (data.success) {
-        setNoteList(data.data);
-      }
-    } catch (error) {
-      console.error("Error fetching Note list:", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchNoteList();
-  }, []);
 
   const handleEditClick = (note: Note) => {
     setSelectedNote(note);
     setIsModalOpen(true);
   };
 
+  const handleOnSave = () => {};
+
   return (
     <div className="container mx-auto p-5">
       <h3 className="text-3xl font-bold mb-5">Notes</h3>
       <div className="grid md:grid-cols-3 grid-cols-1 gap-5">
-        {noteList.map((Note) => (
-          <NoteCard note={Note} handleEditClick={handleEditClick} />
+        {notes.map((note) => (
+          <NoteCard note={note} handleEditClick={handleEditClick} />
         ))}
       </div>
       <Modal
@@ -50,7 +44,11 @@ const NoteList = () => {
         onClose={() => setIsModalOpen(false)}
         title="Edit Note"
       >
-        <NoteForm noteData={selectedNote} />
+        <NoteForm
+          noteData={selectedNote}
+          editMode={true}
+          handleOnSave={handleOnSave}
+        />
       </Modal>
     </div>
   );

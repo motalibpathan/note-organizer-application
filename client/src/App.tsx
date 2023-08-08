@@ -1,10 +1,26 @@
-import Categories from "./components/Categories.tsx";
+import { useEffect, useState } from "react";
+import Categories, { Category } from "./components/Categories.tsx";
 import Nav from "./components/Nav.tsx";
 import NoteForm from "./components/NoteForm.tsx";
-import NoteList from "./components/NoteList.tsx";
+import NoteList, { Note } from "./components/NoteList.tsx";
+import useCategoriesAndNotes from "./hooks/useCategoriesAndNotes.tsx";
 import "./index.css";
 
 function App() {
+  const { categories, notes, loading, error } = useCategoriesAndNotes();
+
+  const [optimisticNotes, setOptimisticNotes] = useState<Note[]>(notes);
+  const [optimisticCategories, setOptimisticCategories] =
+    useState<Category[]>(categories);
+
+  useEffect(() => {
+    if (!loading && !error) {
+      setOptimisticNotes(notes);
+      setOptimisticCategories(categories);
+    }
+  }, [loading, error, notes, categories]);
+
+  const handleOnSave = () => {};
   return (
     <>
       <div className="overflow-hidden absolute top-0 left-0 bottom-0 right-0 z-[1]">
@@ -21,11 +37,21 @@ function App() {
         </p>
         <div className="md:container mx-auto p-5 grid md:grid-cols-3 gap-5">
           <div className="col-span-2">
-            <NoteForm />
+            <NoteForm handleOnSave={handleOnSave} />
           </div>
-          <Categories />
+          <Categories
+            categories={optimisticCategories}
+            setCategories={setOptimisticCategories}
+            loading={loading}
+            error={error}
+          />
         </div>
-        <NoteList />
+        <NoteList
+          notes={optimisticNotes}
+          setNotes={setOptimisticNotes}
+          loading={loading}
+          error={error}
+        />
       </div>
     </>
   );

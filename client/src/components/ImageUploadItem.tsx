@@ -15,10 +15,7 @@ const ImageUploadItem: React.FC<ImageUploadItemProps> = ({
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState("");
 
-  let intervalId: number;
-
   const uploadImage = async () => {
-    clearInterval(intervalId);
     setError("");
     try {
       const formData = new FormData();

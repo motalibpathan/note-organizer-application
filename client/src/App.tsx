@@ -20,7 +20,10 @@ function App() {
     }
   }, [loading, error, notes, categories]);
 
-  const handleOnSave = () => {};
+  const handleOnSave = (note: Note) => {
+    console.log(note);
+    setOptimisticNotes((prev) => [note, ...prev]);
+  };
   return (
     <>
       <div className="overflow-hidden absolute top-0 left-0 bottom-0 right-0 z-[1]">
@@ -37,7 +40,10 @@ function App() {
         </p>
         <div className="md:container mx-auto p-5 grid md:grid-cols-3 gap-5">
           <div className="col-span-2">
-            <NoteForm handleOnSave={handleOnSave} />
+            <NoteForm
+              handleOnSave={handleOnSave}
+              categories={optimisticCategories}
+            />
           </div>
           <Categories
             categories={optimisticCategories}
@@ -51,6 +57,7 @@ function App() {
           setNotes={setOptimisticNotes}
           loading={loading}
           error={error}
+          categories={optimisticCategories}
         />
       </div>
     </>

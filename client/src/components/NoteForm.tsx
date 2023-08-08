@@ -3,6 +3,7 @@ import { BsCloudCheck } from "react-icons/bs";
 import { FiUpload } from "react-icons/fi";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import { TfiClose } from "react-icons/tfi";
+import { Category } from "./Categories";
 import ImageUploadItem from "./ImageUploadItem";
 import { Note } from "./NoteList";
 
@@ -16,6 +17,7 @@ interface NoteFormProps {
   } | null;
   editMode?: boolean;
   handleOnSave: (note: Note) => void;
+  categories: Category[];
 }
 
 interface FormData {
@@ -30,6 +32,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
   noteData,
   editMode,
   handleOnSave,
+  categories,
 }) => {
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
@@ -117,7 +120,8 @@ const NoteForm: React.FC<NoteFormProps> = ({
     }));
   };
 
-  const handleSaveNote = () => {
+  const handleSaveNote = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     saveNote();
     handleOnSave({
       _id: formData?._id || "",
@@ -126,13 +130,24 @@ const NoteForm: React.FC<NoteFormProps> = ({
       category: formData?.category || "",
       photos: formData?.photos || [],
     });
+    !editMode &&
+      setFormData({
+        _id: "",
+        title: "",
+        content: "",
+        category: "",
+        photos: [],
+      });
   };
 
   return (
     <>
       <div className="w-full rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-white">
         <div className={`${editMode ? "p-0" : "p-5"} overflow-hidden`}>
-          <form className="p-5 rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-blue-200 overflow-y-auto max-h-[500px]">
+          <form
+            onSubmit={(e) => handleSaveNote(e)}
+            className="p-5 rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-blue-200 overflow-y-auto max-h-[500px]"
+          >
             <div className="flex justify-between relative">
               {!editMode ? (
                 <>
@@ -172,6 +187,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
               className="py-2 px-3 border-b border-gray-400 bg-transparent w-full outline-none placeholder:text-[#676767]"
               type="text"
               placeholder="Note Title"
+              required
             />
             <textarea
               value={formData.content}
@@ -192,9 +208,11 @@ const NoteForm: React.FC<NoteFormProps> = ({
               <option value="">Select Category</option>
               {/* Render categories dynamically based on data */}
               {/* Example: */}
-              <option value="work">Work</option>
-              <option value="personal">Personal</option>
-              <option value="others">Others</option>
+              {categories.map((category) => (
+                <option key={category._id} value={category._id}>
+                  {category.name}
+                </option>
+              ))}
             </select>
 
             {/* Image Upload */}
@@ -245,11 +263,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
             )}
 
             <div className="flex justify-end mt-3">
-              <button
-                type="button" // Changed to "button" to prevent form submission
-                onClick={handleSaveNote}
-                className="bg-green-500 py-2 px-7 text-black rounded-md hover:bg-transparent border border-green-500 hover:text-green-500 duration-300 font-bold"
-              >
+              <button className="bg-green-500 py-2 px-7 text-black rounded-md hover:bg-transparent border border-green-500 hover:text-green-500 duration-300 font-bold">
                 Save
                 {/* Button text based on _id */}
               </button>

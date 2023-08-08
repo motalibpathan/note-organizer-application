@@ -76,7 +76,7 @@ exports.updateNote = async (req, res) => {
 exports.getAllNotes = async (req, res) => {
   try {
     // Fetch all notes from the database
-    const allNotes = await Note.find();
+    const allNotes = await Note.find().sort({ createdAt: -1 });
     res.json({ success: true, data: allNotes });
   } catch (error) {
     // Handle errors during note retrieval

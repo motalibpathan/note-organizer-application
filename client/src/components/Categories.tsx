@@ -24,14 +24,79 @@ const Categories: React.FC<CategoriesPageProps> = ({
   console.log("🚀 ~ file: Categories.tsx:21 ~ setCategories:", setCategories);
   console.log("🚀 ~ file: Categories.tsx:19 ~ error:", error);
   console.log("🚀 ~ file: Categories.tsx:19 ~ loading:", loading);
-  const [categoryName, setCategoryName] = useState<string>("");
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  // const [selectedCategory, setselectedCategory] = useState<Category>({
-  //   name: "",
-  // });
-  // const handleClick = () => {};
-  // const handleEdit = (category: Category) => {};
-  // const handleDelete = (category: Category) => {};
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [selectedCategory, setSelectedCategory] = useState<Category>({
+    name: "",
+  });
+  const handleClick = async () => {
+    if (selectedCategory._id) {
+      const response = await fetch(`/api/categories/${selectedCategory._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: selectedCategory.name }),
+      });
+
+      const result = await response.json();
+
+      setCategories((prev) =>
+        prev.map((cat) => {
+          if (cat._id === selectedCategory._id) {
+            return { ...cat, name: result.data.name };
+          }
+          return cat;
+        })
+      );
+      setIsModalOpen(false);
+    } else {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ name: selectedCategory.name }),
+      });
+
+      const result = await response.json();
+
+      setCategories((prev) => [
+        ...prev,
+        { name: result.data.name, _id: result.data._id },
+      ]);
+      setIsModalOpen(false);
+    }
+    setSelectedCategory({ name: "", _id: "" });
+  };
+  const handleEdit = (category: Category) => {
+    setSelectedCategory(category);
+    setIsModalOpen(true);
+  };
+  const handleDelete = (category: Category) => {
+    setSelectedCategory(category);
+    setIsDeleteModalOpen(true);
+  };
+  const handleDeleteConfirm = async () => {
+    const response = await fetch(`/api/categories/${selectedCategory._id}`, {
+      method: "DELETE",
+    });
+
+    const result = await response.json();
+    console.log(
+      "🚀 ~ file: Categories.tsx:87 ~ handleDeleteConfirm ~ result:",
+      result
+    );
+    setCategories((prev) => prev.filter((c) => c._id !== selectedCategory._id));
+    setIsDeleteModalOpen(false);
+    setSelectedCategory({ name: "", _id: "" });
+  };
+  const handleCloseModal = () => {
+    setIsDeleteModalOpen(false);
+    setIsModalOpen(false);
+    setSelectedCategory({ name: "", _id: "" });
+  };
   return (
     <>
       <div className="w-full rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-white ">
@@ -44,7 +109,7 @@ const Categories: React.FC<CategoriesPageProps> = ({
               </div>
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="py-1 px-3 bg-blue-600 rounded-md"
+                className="py-1 px-3 bg-yellow-300 text-black font-bold rounded-md"
               >
                 Add
               </button>
@@ -60,11 +125,11 @@ const Categories: React.FC<CategoriesPageProps> = ({
                   <span>{category.name}</span>
                   <div className="flex gap-2">
                     <GoPencil
-                      // onClick={() => handleEdit(category)}
+                      onClick={() => handleEdit(category)}
                       className="cursor-pointer"
                     />
                     <HiOutlineTrash
-                      // onClick={() => handleDelete(category)}
+                      onClick={() => handleDelete(category)}
                       className="cursor-pointer"
                     />
                   </div>
@@ -76,24 +141,52 @@ const Categories: React.FC<CategoriesPageProps> = ({
       </div>
       <Modal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         title="Add Category"
       >
-        <form className="flex flex-col items-end gap-2 mt-3">
+        <div className="flex flex-col items-end gap-2 mt-3">
           <input
             type="text"
-            value={categoryName}
-            onChange={(e) => setCategoryName(e.target.value)}
+            value={selectedCategory.name}
+            onChange={(e) =>
+              setSelectedCategory((prev) => ({ ...prev, name: e.target.value }))
+            }
             className="w-full bg-transparent py-2 px-3 rounded-lg border border-gray-500 outline-none"
             placeholder="Category name"
           />
           <button
-            // onClick={() => handleClick()}
+            onClick={() => handleClick()}
             className="bg-yellow-200 text-black py-2 px-6 rounded-lg font-bold border border-yellow-200 hover:bg-transparent hover:text-yellow-200 duration-300"
           >
-            Add
+            {selectedCategory._id ? "Update" : "Add"}
           </button>
-        </form>
+        </div>
+      </Modal>
+      <Modal
+        isOpen={isDeleteModalOpen}
+        onClose={handleCloseModal}
+        title="Delete Category"
+      >
+        <p>
+          Are you sure want to delete{" "}
+          <span className="text-red-500 font-bold">
+            {selectedCategory.name}
+          </span>
+        </p>
+        <div className="flex justify-end gap-2 mt-3">
+          <button
+            onClick={() => setIsDeleteModalOpen(false)}
+            className="bg-red-500 text-black py-2 px-6 rounded-lg font-bold border border-red-500 hover:bg-transparent hover:text-red-500 duration-300"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={() => handleDeleteConfirm()}
+            className="bg-green-500 text-black py-2 px-6 rounded-lg font-bold border border-green-500 hover:bg-transparent hover:text-green-200 duration-300"
+          >
+            Confirm
+          </button>
+        </div>
       </Modal>
     </>
   );

@@ -1,6 +1,7 @@
 import Categories from "./components/Categories.tsx";
 import Nav from "./components/Nav.tsx";
 import NoteForm from "./components/NoteForm.tsx";
+import NoteList from "./components/NoteList.tsx";
 import "./index.css";
 
 function App() {
@@ -24,6 +25,7 @@ function App() {
           </div>
           <Categories />
         </div>
+        <NoteList />
       </div>
     </>
   );

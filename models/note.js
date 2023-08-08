@@ -5,14 +5,14 @@ const NoteSchema = new Schema(
     title: {
       type: String,
       required: [true, "Title is required."],
-      minlength: [3, "Title must be at least 3 characters long."],
-      maxlength: [100, "Title cannot exceed 100 characters."],
+      // minlength: [3, "Title must be at least 3 characters long."],
+      // maxlength: [100, "Title cannot exceed 100 characters."],
     },
     content: {
       type: String,
-      required: [true, "Content is required."],
-      minlength: [10, "Content must be at least 10 characters long."],
-      maxlength: [1000, "Content cannot exceed 1000 characters."],
+      // required: [true, "Content is required."],
+      // minlength: [10, "Content must be at least 10 characters long."],
+      // maxlength: [1000, "Content cannot exceed 1000 characters."],
     },
     category: {
       type: Schema.Types.ObjectId,

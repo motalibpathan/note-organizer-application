@@ -21,6 +21,11 @@ mongoose
   .then(() => console.log("MongoDB connected"))
   .catch((err) => console.log(err));
 
+// Serve static files from the "uploads" directory
+app.use("/api/uploads", express.static("uploads"));
+
+app.use("/api/upload", require("./routes/uploadRoutes"));
+
 app.use("/api/notes", require("./routes/noteRoutes"));
 app.use("/api/categories", require("./routes/categoryRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
@@ -33,6 +38,16 @@ app.get("/api/test", (req, res) => {
 app.use(express.static("./client/dist"));
 app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
+});
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  // Set a default status code and error message
+  res.status(err.status || 500).json({
+    success: false,
+    message: err.message || "Internal Server Error",
+  });
 });
 
 const port = process.env.PORT || 5000;

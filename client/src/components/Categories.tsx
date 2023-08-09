@@ -21,7 +21,6 @@ const Categories: React.FC<CategoriesPageProps> = ({
   loading,
   error,
 }) => {
-  console.log("🚀 ~ file: Categories.tsx:21 ~ setCategories:", setCategories);
   console.log("🚀 ~ file: Categories.tsx:19 ~ error:", error);
   console.log("🚀 ~ file: Categories.tsx:19 ~ loading:", loading);
 

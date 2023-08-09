@@ -3,12 +3,14 @@ import Categories, { Category } from "./components/Categories.tsx";
 import Nav from "./components/Nav.tsx";
 import NoteForm from "./components/NoteForm.tsx";
 import NoteList, { Note } from "./components/NoteList.tsx";
+import Toast from "./components/Toast.tsx";
+import { useAuthContext } from "./hooks/useAuthContext.tsx";
 import useCategoriesAndNotes from "./hooks/useCategoriesAndNotes.tsx";
 import "./index.css";
 
 function App() {
+  const { toast, setToast } = useAuthContext();
   const { categories, notes, loading, error } = useCategoriesAndNotes();
-
   const [optimisticNotes, setOptimisticNotes] = useState<Note[]>(notes);
   const [optimisticCategories, setOptimisticCategories] =
     useState<Category[]>(categories);
@@ -21,9 +23,10 @@ function App() {
   }, [loading, error, notes, categories]);
 
   const handleOnSave = (note: Note) => {
-    console.log(note);
     setOptimisticNotes((prev) => [note, ...prev]);
   };
+
+  console.log("app rerendered");
   return (
     <>
       <div className="overflow-hidden absolute top-0 left-0 bottom-0 right-0 z-[1]">
@@ -60,6 +63,12 @@ function App() {
           categories={optimisticCategories}
         />
       </div>
+      <Toast
+        handleClose={() => setToast((p) => ({ ...p, active: false }))}
+        message={toast.message}
+        isOpen={toast.active}
+        className={toast.className}
+      />
     </>
   );
 }

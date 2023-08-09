@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import { Category } from "../components/Categories";
 import { Note } from "../components/NoteList";
+import { useAuthContext } from "./useAuthContext";
 
 const useCategoriesAndNotes = () => {
+  const { user } = useAuthContext();
   const [categories, setCategories] = useState<Category[]>([]);
   const [notes, setNotes] = useState<Note[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -10,24 +12,21 @@ const useCategoriesAndNotes = () => {
 
   useEffect(() => {
     // Fetch categories and notes here
+    if (!user) return;
     const fetchCategoriesAndNotes = async () => {
       try {
         // Fetch categories
         const categoriesResponse = await fetch("/api/categories");
         const categoriesData = await categoriesResponse.json();
-        console.log(
-          "🚀 ~ file: useCategoriesAndNotes.tsx:18 ~ fetchCategoriesAndNotes ~ categoriesData:",
-          categoriesData
-        );
+
+        if (categoriesData.success === false) return;
         setCategories(categoriesData.data);
 
         // Fetch notes
         const notesResponse = await fetch("/api/notes");
         const notesData = await notesResponse.json();
-        console.log(
-          "🚀 ~ file: useCategoriesAndNotes.tsx:23 ~ fetchCategoriesAndNotes ~ notesData:",
-          notesData
-        );
+
+        if (notesData.success === false) return;
         setNotes(notesData.data);
 
         setLoading(false);
@@ -38,7 +37,7 @@ const useCategoriesAndNotes = () => {
     };
 
     fetchCategoriesAndNotes();
-  }, []);
+  }, [user]);
 
   return { categories, notes, loading, error };
 };

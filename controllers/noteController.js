@@ -9,6 +9,7 @@ exports.createNote = async (req, res) => {
 
     // Create a new note in the database
     const newNote = await Note.create({
+      user: req.userId,
       title,
       content,
       category: category || undefined,
@@ -48,6 +49,7 @@ exports.updateNote = async (req, res) => {
 
     // Update the note properties
     existingNote.title = title;
+    existingNote.user = req.userId;
     existingNote.content = content;
     existingNote.category = category || undefined;
 
@@ -76,7 +78,10 @@ exports.updateNote = async (req, res) => {
 exports.getAllNotes = async (req, res) => {
   try {
     // Fetch all notes from the database
-    const allNotes = await Note.find().sort({ createdAt: -1 });
+    console.log(req.userId);
+    const allNotes = await Note.find({ user: req.userId }).sort({
+      createdAt: -1,
+    });
     res.json({ success: true, data: allNotes });
   } catch (error) {
     // Handle errors during note retrieval

@@ -6,11 +6,15 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bodyParser = require("body-parser");
 const path = require("path");
+const cookieParser = require("cookie-parser");
+
+const authenticate = require("./middlewares/authenticate");
 
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 const mongoURI = process.env.MONGODB_URI; // Use environment variable for MongoDB URI
 mongoose
@@ -24,10 +28,10 @@ mongoose
 // Serve static files from the "uploads" directory
 app.use("/api/uploads", express.static("uploads"));
 
-app.use("/api/upload", require("./routes/uploadRoutes"));
+app.use("/api/upload", authenticate, require("./routes/uploadRoutes"));
+app.use("/api/notes", authenticate, require("./routes/noteRoutes"));
+app.use("/api/categories", authenticate, require("./routes/categoryRoutes"));
 
-app.use("/api/notes", require("./routes/noteRoutes"));
-app.use("/api/categories", require("./routes/categoryRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 
 app.get("/api/test", (req, res) => {

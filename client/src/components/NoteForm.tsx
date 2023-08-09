@@ -62,6 +62,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
         body: JSON.stringify(formData),
       });
       const result = await response.json();
+      console.log("🚀 ~ file: NoteForm.tsx:65 ~ saveNote ~ result:", result);
       if (result.success) {
         return setFormData((prev) => ({ ...prev, _id: result.data._id }));
       } else {

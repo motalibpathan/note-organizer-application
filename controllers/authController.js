@@ -10,136 +10,92 @@ function generateToken(user) {
 }
 
 // @desc    Register a new user
-// @route   POST /api/register
+// @route   POST /api/auth/register
 exports.registerUser = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+  const { username, email, password } = req.body;
 
-    // Validate if username, email, and password are provided
-    if (!username || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Username, email, and password are required.",
-      });
+  try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(400)
+        .json({ success: false, message: "User already exists" });
     }
 
-    // Create a new user in the database
-    const newUser = await User.create({ username, email, password });
-
-    // Generate JWT token
-    const token = generateToken(newUser);
-
-    // Return response with the newly registered user data and token
-    res.status(201).json({ success: true, data: newUser, token });
-  } catch (error) {
-    // Handle errors during user registration
-    res.status(500).json({
-      success: false,
-      message: "Error registering user",
-      error: error.message,
-    });
-  }
-};
-
-// @desc    Login a user
-// @route   POST /api/login
-exports.loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    // Find the user by email in the database
-    const user = await User.findOne({ email });
-
-    // Validate if user exists and if password is correct
-    if (!user || user.password !== password) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password.",
-      });
-    }
-
-    // Generate JWT token
-    const token = generateToken(user);
-
-    // Return response with the generated JWT token
-    res.json({ success: true, token });
-  } catch (error) {
-    // Handle errors during user login
-    res.status(500).json({
-      success: false,
-      message: "Error logging in",
-      error: error.message,
-    });
-  }
-};
-
-// @desc    Register a new user
-// @route   POST /api/register
-exports.registerUser = async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
-
-    // Validate if username, email, and password are provided
-    if (!username || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "Username, email, and password are required.",
-      });
-    }
-
-    // Hash the password using bcrypt
+    // Hash the password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create a new user in the database with the hashed password
-    const newUser = await User.create({
+    // Create a new user
+    const newUser = new User({
       username,
       email,
       password: hashedPassword,
     });
 
-    // Generate JWT token
-    const token = generateToken(newUser);
+    await newUser.save();
 
-    // Return response with the newly registered user data and token
-    res.status(201).json({ success: true, data: newUser, token });
-  } catch (error) {
-    // Handle errors during user registration
-    res.status(500).json({
-      success: false,
-      message: "Error registering user",
-      error: error.message,
+    // Create and send an access token cookie
+    const accessToken = generateToken(newUser);
+    res.cookie("access-token", accessToken, {
+      httpOnly: true,
+      maxAge: 3600000, // Cookie expiration time in milliseconds
+      secure: process.env.NODE_ENV === "production", // Set this based on your environment
     });
+
+    return res.json({ success: true, data: newUser });
+  } catch (error) {
+    console.error("Error registering:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
 // @desc    Login a user
-// @route   POST /api/login
+// @route   POST /api/auth/login
 exports.loginUser = async (req, res) => {
+  const { email, password } = req.body;
+
   try {
-    const { email, password } = req.body;
-
-    // Find the user by email in the database
+    // Find the user by email
     const user = await User.findOne({ email });
-
-    // Validate if user exists and if password is correct
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({
-        success: false,
-        message: "Invalid email or password.",
-      });
+    if (!user) {
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
-    // Generate JWT token
-    const token = generateToken(user);
+    // Compare hashed password
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Incorrect password" });
+    }
 
-    // Return response with the generated JWT token
-    res.json({ success: true, token });
-  } catch (error) {
-    // Handle errors during user login
-    res.status(500).json({
-      success: false,
-      message: "Error logging in",
-      error: error.message,
+    // Create and send an access token cookie
+    const accessToken = generateToken(user);
+    res.cookie("access-token", accessToken, {
+      httpOnly: true,
+      maxAge: 3600000, // Cookie expiration time in milliseconds
+      secure: process.env.NODE_ENV === "production", // Set this based on your environment
     });
+
+    return res.json({ success: true, data: user });
+  } catch (error) {
+    console.error("Error logging in:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
+};
+
+// @desc    Login a user
+// @route   POST /api/auth/login
+exports.logoutUser = (req, res) => {
+  // Clear the access token cookie
+  res.clearCookie("access-token");
+
+  return res.json({ success: true, message: "Logged out successfully." });
 };

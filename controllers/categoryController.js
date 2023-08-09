@@ -26,7 +26,7 @@ exports.getAllCategories = async (req, res) => {
 // @route   POST /api/categories
 exports.createCategory = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name } = req.body;
 
     if (!name) {
       return res
@@ -35,7 +35,7 @@ exports.createCategory = async (req, res) => {
     }
 
     // Create a new category in the database
-    const newCategory = await Category.create({ name, description });
+    const newCategory = await Category.create({ name });
 
     res.status(201).json({ success: true, data: newCategory });
   } catch (error) {
@@ -83,7 +83,7 @@ exports.getCategoryById = async (req, res) => {
 // @route   PUT /api/categories/:id
 exports.updateCategory = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name } = req.body;
 
     if (!name) {
       return res
@@ -94,7 +94,7 @@ exports.updateCategory = async (req, res) => {
     // Find the category by its ID in the database and update it
     const updatedCategory = await Category.findByIdAndUpdate(
       req.params.id,
-      { name, description },
+      { name },
       { new: true }
     );
     if (!updatedCategory) {

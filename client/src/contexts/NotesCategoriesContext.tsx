@@ -1,12 +1,12 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
+import { useAuthContext } from "../hooks/useAuthContext";
 
-// Define the types for notes and categories
 export interface Note {
   _id?: string;
   title: string;
-  description: string;
+  content: string;
   category: string;
-  images: File[] | null;
+  photos: Array<{ filename: string; originalName: string }> | [];
 }
 
 export interface Category {
@@ -14,71 +14,295 @@ export interface Category {
   name: string;
 }
 
-// Create the context
 interface NotesCategoriesContextType {
   notes: Note[];
   categories: Category[];
-  addNote: (note: Note) => void;
-  editNote: (note: Note) => void;
-  deleteNote: (noteId: string) => void;
-  addCategory: (category: Category) => void;
-  editCategory: (category: Category) => void;
-  deleteCategory: (categoryId: string) => void;
+  noteLoading: boolean;
+  categoryLoading: boolean;
+  error: string | null;
+  uploading: boolean;
+  updating: boolean;
+  deleting: boolean;
+  addNote: (note: Note, stateUpdate: boolean) => Promise<Note>;
+  editNote: (note: Note, stateUpdate: boolean) => void;
+  deleteNote: (noteId: string) => Promise<{ success: boolean } | undefined>;
+  addCategory: (
+    category: Category
+  ) => Promise<{ success: boolean } | undefined>;
+  editCategory: (
+    category: Category
+  ) => Promise<{ success: boolean } | undefined>;
+  deleteCategory: (
+    categoryId: string
+  ) => Promise<{ success: boolean } | undefined>;
 }
 
 export const NotesCategoriesContext = createContext<
   NotesCategoriesContextType | undefined
 >(undefined);
 
-// Create a provider component
 export const NotesCategoriesProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const [notes, setNotes] = useState<Note[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [noteLoading, setNoteLoading] = useState<boolean>(true);
+  const [categoryLoading, setCategoryLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState<boolean>(false);
+  const [updating, setUpdating] = useState<boolean>(false);
+  const [deleting, setDeleting] = useState<boolean>(false);
 
-  // Add, edit, and delete functions for notes and categories
-  const addNote = (note: Note) => {
-    setNotes([...notes, note]);
+  const { user, setToast } = useAuthContext();
+
+  useEffect(() => {
+    fetchNoteData();
+    fetchCategoryData();
+  }, [user]);
+
+  const fetchNoteData = async () => {
+    setNoteLoading(true);
+    setError(null);
+
+    try {
+      const notesResponse = await fetch("/api/notes");
+      const notesData = await notesResponse.json();
+
+      if (notesData.success) {
+        setNotes(notesData.data);
+      }
+    } catch (error) {
+      setError("Error fetching notes and categories.");
+    } finally {
+      setNoteLoading(false);
+    }
   };
 
-  const editNote = (editedNote: Note) => {
-    const updatedNotes = notes.map((note) =>
-      note._id === editedNote._id ? editedNote : note
-    );
-    setNotes(updatedNotes);
+  const fetchCategoryData = async () => {
+    setCategoryLoading(true);
+    setError(null);
+    try {
+      const categoriesResponse = await fetch("/api/categories");
+      const categoriesData = await categoriesResponse.json();
+      if (categoriesData.success) {
+        setCategories(categoriesData.data);
+      }
+    } catch (error) {
+      setError("Error fetching notes and categories.");
+    } finally {
+      setCategoryLoading(false);
+    }
   };
 
-  const deleteNote = (noteId: string) => {
-    const updatedNotes = notes.filter((note) => note._id !== noteId);
-    setNotes(updatedNotes);
+  const addNote = async (note: Note, stateUpdate: boolean) => {
+    setUploading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/notes", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(note),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (stateUpdate) setNotes((prev) => [data.data, ...prev]);
+        return data.data;
+      } else {
+        setError(data.message || "Failed to add note.");
+      }
+    } catch (error) {
+      setError("Error adding note.");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  const addCategory = (category: Category) => {
-    setCategories([...categories, category]);
+  const editNote = async (editedNote: Note, stateUpdate: boolean) => {
+    setUpdating(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/notes/${editedNote._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editedNote),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (stateUpdate) {
+          const exitsIndex = notes.findIndex((n) => n._id === editedNote._id);
+          if (exitsIndex !== -1) {
+            setNotes((prev) =>
+              prev.map((note) =>
+                note._id === editedNote._id ? editedNote : note
+              )
+            );
+          } else {
+            setNotes((prev) => [editedNote, ...prev]);
+          }
+        }
+        return data.data;
+      } else {
+        setError(data.message || "Failed to edit note.");
+      }
+    } catch (error) {
+      setError("Error editing note.");
+    } finally {
+      setUpdating(false);
+    }
   };
 
-  const editCategory = (editedCategory: Category) => {
-    const updatedCategories = categories.map((category) =>
-      category._id === editedCategory._id ? editedCategory : category
-    );
-    setCategories(updatedCategories);
+  const deleteNote = async (noteId: string) => {
+    setDeleting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/notes/${noteId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const updatedNotes = notes.filter((note) => note._id !== noteId);
+        setNotes(updatedNotes);
+        setToast((p) => ({
+          ...p,
+          message: "Note deleted successfully",
+          active: true,
+        }));
+        return { success: true };
+      } else {
+        setError(data.message || "Failed to delete note.");
+      }
+    } catch (error) {
+      setError("Error deleting note.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
-  const deleteCategory = (categoryId: string) => {
-    const updatedCategories = categories.filter(
-      (category) => category._id !== categoryId
-    );
-    setCategories(updatedCategories);
+  const addCategory = async (category: Category) => {
+    setUploading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/categories", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(category),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCategories([...categories, data.data]);
+        setToast((p) => ({
+          ...p,
+          message: "Category added successfully",
+          active: true,
+        }));
+        return { success: true };
+      } else {
+        setError(data.message || "Failed to add category.");
+      }
+    } catch (error) {
+      setError("Error adding category.");
+    } finally {
+      setUploading(false);
+    }
   };
 
-  // You can fetch initial notes and categories using useEffect here
+  const editCategory = async (editedCategory: Category) => {
+    setUpdating(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/categories/${editedCategory._id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(editedCategory),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const updatedCategories = categories.map((category) =>
+          category._id === editedCategory._id ? editedCategory : category
+        );
+        setCategories(updatedCategories);
+        setToast((p) => ({
+          ...p,
+          message: "Category updated successfully",
+          active: true,
+        }));
+        return { success: true };
+      } else {
+        setError(data.message || "Failed to edit category.");
+      }
+    } catch (error) {
+      setError("Error editing category.");
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const deleteCategory = async (categoryId: string) => {
+    setDeleting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/categories/${categoryId}`, {
+        method: "DELETE",
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        const updatedCategories = categories.filter(
+          (category) => category._id !== categoryId
+        );
+        setCategories(updatedCategories);
+        setToast((p) => ({
+          ...p,
+          message: "Category deleted successfully",
+          active: true,
+        }));
+        return { success: true };
+      } else {
+        setError(data.message || "Failed to delete category.");
+      }
+    } catch (error) {
+      setError("Error deleting category.");
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   return (
     <NotesCategoriesContext.Provider
       value={{
         notes,
         categories,
+        noteLoading,
+        categoryLoading,
+        error,
+        uploading,
+        updating,
+        deleting,
         addNote,
         editNote,
         deleteNote,

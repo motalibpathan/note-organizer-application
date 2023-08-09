@@ -138,7 +138,8 @@ body {
   }
 }
 
-#app-content {
+.app-content,
+.login-modal {
   transform: translateY(0);
   animation: appOpen 2s cubic-bezier(0.23, 1, 0.32, 1);
   animation-delay: 3.7s;

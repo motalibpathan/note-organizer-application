@@ -3,21 +3,14 @@ import { BsCloudCheck } from "react-icons/bs";
 import { FiUpload } from "react-icons/fi";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import { TfiClose } from "react-icons/tfi";
-import { Category } from "./Categories";
+import { Note } from "../contexts/NotesCategoriesContext";
+import { useNotesCategoriesContext } from "../hooks/useNotesCategoriesContext";
 import ImageUploadItem from "./ImageUploadItem";
-import { Note } from "./NoteList";
 
 interface NoteFormProps {
-  noteData?: {
-    _id: string;
-    title: string;
-    content: string;
-    category?: string;
-    photos?: Array<{ filename: string; originalName: string }>;
-  } | null;
+  noteData?: Note | null;
   editMode?: boolean;
-  handleOnSave: (note: Note) => void;
-  categories: Category[];
+  handleModalClose?: () => void;
 }
 
 interface FormData {
@@ -31,9 +24,10 @@ interface FormData {
 const NoteForm: React.FC<NoteFormProps> = ({
   noteData,
   editMode,
-  handleOnSave,
-  categories,
+  handleModalClose,
 }) => {
+  const { categories, updating, uploading, addNote, editNote } =
+    useNotesCategoriesContext();
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   const initialFormData: FormData = {
@@ -45,39 +39,10 @@ const NoteForm: React.FC<NoteFormProps> = ({
   };
 
   const [formData, setFormData] = useState<FormData>(initialFormData);
-  const [saving, setSaving] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
-  // Function to create or update the note on the server
-  const saveNote = async () => {
-    setSaving(true);
-    try {
-      // Use your custom fetch implementation or other HTTP library here
-      const url = formData._id ? `/api/notes/${formData._id}` : `/api/notes`;
-      const response = await fetch(url, {
-        method: formData._id ? "PUT" : "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-      const result = await response.json();
-      console.log("🚀 ~ file: NoteForm.tsx:65 ~ saveNote ~ result:", result);
-      if (result.success) {
-        return setFormData((prev) => ({ ...prev, _id: result.data._id }));
-      } else {
-        throw new Error("Error updating note");
-      }
-    } catch (error) {
-      console.error("Error updating note:", error);
-      throw error;
-    } finally {
-      setSaving(false);
-    }
-  };
-
   // Function to handle form field changes
-  const handleChange = (
+  const handleChange = async (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
     >
@@ -89,8 +54,13 @@ const NoteForm: React.FC<NoteFormProps> = ({
       clearTimeout(timeoutId);
     }
 
-    const newTimeoutId = setTimeout(() => {
-      saveNote();
+    const newTimeoutId = setTimeout(async () => {
+      if (formData._id) {
+        editNote(formData, editMode ? true : false);
+      } else {
+        const newNote = await addNote(formData, false);
+        setFormData({ ...formData, _id: newNote._id });
+      }
     }, 500);
 
     setTimeoutId(newTimeoutId);
@@ -121,16 +91,14 @@ const NoteForm: React.FC<NoteFormProps> = ({
     }));
   };
 
-  const handleSaveNote = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSaveNote = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    saveNote();
-    handleOnSave({
-      _id: formData?._id || "",
-      title: formData?.title || "",
-      content: formData?.content || "",
-      category: formData?.category || "",
-      photos: formData?.photos || [],
-    });
+    if (formData._id) {
+      editNote(formData, true);
+    } else {
+      const newNote = await addNote(formData, true);
+      setFormData({ ...formData, _id: newNote._id });
+    }
     !editMode &&
       setFormData({
         _id: "",
@@ -139,6 +107,8 @@ const NoteForm: React.FC<NoteFormProps> = ({
         category: "",
         photos: [],
       });
+
+    handleModalClose && handleModalClose();
   };
 
   return (
@@ -168,7 +138,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
               <div
                 className={`absolute ${editMode ? "-top-4 " : "top-5"} right-0`}
               >
-                {saving ? (
+                {uploading || updating ? (
                   <div className="text_color flex items-center gap-2">
                     <span>Saving</span>
                     <PiSpinnerGapBold className="animate-spin text-lg" />{" "}

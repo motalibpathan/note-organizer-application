@@ -1,4 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import ReactDOM from "react-dom";
 import { TfiClose } from "react-icons/tfi";
 
 interface ModelProps {
@@ -9,11 +11,22 @@ interface ModelProps {
 }
 
 const Modal = ({ isOpen, onClose, title, children }: ModelProps) => {
-  return (
+  const [modalRoot, setModalRoot] = useState<HTMLElement | null>(null);
+
+  useEffect(() => {
+    setModalRoot(document.getElementById("modal-root"));
+  }, []);
+
+  if (!modalRoot) {
+    return null; // Handle the case when the modal root element is not found
+  }
+
+  return ReactDOM.createPortal(
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          className={`fixed inset-0 flex items-center justify-center ${
+          id="modal"
+          className={`fixed top-0 left-0 right-0 bottom-0 flex items-center justify-center h-screen ${
             isOpen ? " z-[999999] " : " z-50 "
           } backdrop-blur-sm `}
         >
@@ -54,7 +67,8 @@ const Modal = ({ isOpen, onClose, title, children }: ModelProps) => {
           ></motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    modalRoot
   );
 };
 

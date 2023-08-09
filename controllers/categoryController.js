@@ -9,6 +9,10 @@ exports.getAllCategories = async (req, res) => {
     const allCategories = await Category.find();
     res.json({ success: true, data: allCategories });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: categoryController.js:12 ~ exports.getAllCategories= ~ error:",
+      error
+    );
     // Handle errors during category retrieval
     res.status(500).json({
       success: false,
@@ -35,6 +39,10 @@ exports.createCategory = async (req, res) => {
 
     res.status(201).json({ success: true, data: newCategory });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: categoryController.js:39 ~ exports.createCategory= ~ error:",
+      error
+    );
     // Handle errors during category creation
     res.status(500).json({
       success: false,
@@ -58,6 +66,10 @@ exports.getCategoryById = async (req, res) => {
     }
     res.json({ success: true, data: category });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: categoryController.js:63 ~ exports.getCategoryById= ~ error:",
+      error
+    );
     // Handle errors during category retrieval
     res.status(500).json({
       success: false,
@@ -93,6 +105,10 @@ exports.updateCategory = async (req, res) => {
     }
     res.json({ success: true, data: updatedCategory });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: categoryController.js:99 ~ exports.updateCategory= ~ error:",
+      error
+    );
     // Handle errors during category update
     res.status(500).json({
       success: false,
@@ -116,6 +132,10 @@ exports.deleteCategory = async (req, res) => {
     }
     res.json({ success: true, message: "Category deleted successfully" });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: categoryController.js:123 ~ exports.deleteCategory ~ error:",
+      error
+    );
     // Handle errors during category deletion
     res.status(500).json({
       success: false,

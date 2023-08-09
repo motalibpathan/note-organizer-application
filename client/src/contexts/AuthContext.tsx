@@ -38,9 +38,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [error, setError] = useState<string | null>(null);
 
   const [toast, setToast] = useState<Toast>({
-    className: "",
+    className: "bg-green-400 text-black font-bold ",
     active: false,
-    message: "",
+    message: "Welcome back!",
   });
 
   useEffect(() => {

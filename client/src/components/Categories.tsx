@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { GoPencil } from "react-icons/go";
 import { HiOutlineTrash } from "react-icons/hi";
+import { useAuthContext } from "../hooks/useAuthContext";
 import Modal from "./Model";
 
 export interface Category {
@@ -24,12 +25,18 @@ const Categories: React.FC<CategoriesPageProps> = ({
   console.log("🚀 ~ file: Categories.tsx:19 ~ error:", error);
   console.log("🚀 ~ file: Categories.tsx:19 ~ loading:", loading);
 
+  const { setToast } = useAuthContext();
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [selectedCategory, setSelectedCategory] = useState<Category>({
     name: "",
   });
+  const [handlingClick, setHandlingClick] = useState<boolean>(false);
+  const [categoryError, setCategoryError] = useState<string>("");
+
   const handleClick = async () => {
+    setHandlingClick(true);
     if (selectedCategory._id) {
       const response = await fetch(`/api/categories/${selectedCategory._id}`, {
         method: "PUT",
@@ -40,6 +47,11 @@ const Categories: React.FC<CategoriesPageProps> = ({
       });
 
       const result = await response.json();
+      if (!result.success) {
+        setCategoryError("Update error");
+        setHandlingClick(false);
+        return;
+      }
 
       setCategories((prev) =>
         prev.map((cat) => {
@@ -60,6 +72,11 @@ const Categories: React.FC<CategoriesPageProps> = ({
       });
 
       const result = await response.json();
+      if (!result.success) {
+        setCategoryError("Something went wrong");
+        setHandlingClick(false);
+        return;
+      }
 
       setCategories((prev) => [
         ...prev,
@@ -67,6 +84,12 @@ const Categories: React.FC<CategoriesPageProps> = ({
       ]);
       setIsModalOpen(false);
     }
+    setHandlingClick(false);
+    setToast((p) => ({
+      ...p,
+      message: selectedCategory._id ? "Update Successful " : "Add Successful ",
+      active: true,
+    }));
     setSelectedCategory({ name: "", _id: "" });
   };
   const handleEdit = (category: Category) => {
@@ -78,23 +101,33 @@ const Categories: React.FC<CategoriesPageProps> = ({
     setIsDeleteModalOpen(true);
   };
   const handleDeleteConfirm = async () => {
+    setHandlingClick(true);
     const response = await fetch(`/api/categories/${selectedCategory._id}`, {
       method: "DELETE",
     });
 
     const result = await response.json();
-    console.log(
-      "🚀 ~ file: Categories.tsx:87 ~ handleDeleteConfirm ~ result:",
-      result
-    );
+    if (!result.success) {
+      setCategoryError("Delete error");
+      setHandlingClick(false);
+      return;
+    }
+
+    setHandlingClick(false);
     setCategories((prev) => prev.filter((c) => c._id !== selectedCategory._id));
     setIsDeleteModalOpen(false);
     setSelectedCategory({ name: "", _id: "" });
+    setToast((p) => ({
+      ...p,
+      message: "Delete Successful ",
+      active: true,
+    }));
   };
   const handleCloseModal = () => {
     setIsDeleteModalOpen(false);
     setIsModalOpen(false);
     setSelectedCategory({ name: "", _id: "" });
+    setCategoryError("");
   };
   return (
     <>
@@ -143,6 +176,7 @@ const Categories: React.FC<CategoriesPageProps> = ({
         onClose={handleCloseModal}
         title="Add Category"
       >
+        {categoryError && <p className="text-red-500">{categoryError}</p>}
         <div className="flex flex-col items-end gap-2 mt-3">
           <input
             type="text"
@@ -155,7 +189,8 @@ const Categories: React.FC<CategoriesPageProps> = ({
           />
           <button
             onClick={() => handleClick()}
-            className="bg-yellow-200 text-black py-2 px-6 rounded-lg font-bold border border-yellow-200 hover:bg-transparent hover:text-yellow-200 duration-300"
+            disabled={handlingClick}
+            className="bg-yellow-200 text-black py-2 px-6 rounded-lg font-bold border border-yellow-200 hover:bg-transparent hover:text-yellow-200 duration-300 disabled:bg-opacity-70"
           >
             {selectedCategory._id ? "Update" : "Add"}
           </button>
@@ -166,6 +201,7 @@ const Categories: React.FC<CategoriesPageProps> = ({
         onClose={handleCloseModal}
         title="Delete Category"
       >
+        {categoryError && <p className="text-red-500">{categoryError}</p>}
         <p>
           Are you sure want to delete{" "}
           <span className="text-red-500 font-bold">
@@ -175,13 +211,15 @@ const Categories: React.FC<CategoriesPageProps> = ({
         <div className="flex justify-end gap-2 mt-3">
           <button
             onClick={() => setIsDeleteModalOpen(false)}
-            className="bg-red-500 text-black py-2 px-6 rounded-lg font-bold border border-red-500 hover:bg-transparent hover:text-red-500 duration-300"
+            disabled={handlingClick}
+            className="bg-red-500 text-black py-2 px-6 rounded-lg font-bold border border-red-500 hover:bg-transparent hover:text-red-500 duration-300 disabled:bg-opacity-70"
           >
             Cancel
           </button>
           <button
             onClick={() => handleDeleteConfirm()}
-            className="bg-green-500 text-black py-2 px-6 rounded-lg font-bold border border-green-500 hover:bg-transparent hover:text-green-200 duration-300"
+            disabled={handlingClick}
+            className="bg-green-500 text-black py-2 px-6 rounded-lg font-bold border border-green-500 hover:bg-transparent hover:text-green-200 duration-300 disabled:bg-opacity-70"
           >
             Confirm
           </button>

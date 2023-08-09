@@ -137,3 +137,141 @@ body {
     transform: translateX(100%);
   }
 }
+
+#app-content {
+  transform: translateY(0);
+  animation: appOpen 2s cubic-bezier(0.23, 1, 0.32, 1);
+  animation-delay: 3.7s;
+}
+
+@keyframes appOpen {
+  0% {
+    transform: translateY(400px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+/* preloader  */
+.loader-wrap {
+  position: fixed;
+  z-index: 10;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: rgb(17, 17, 17);
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+  overflow: hidden;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  align-items: center;
+  -webkit-box-pack: center;
+  -ms-flex-pack: center;
+  justify-content: center;
+  z-index: 99999999999999;
+  transition: bottom 2s cubic-bezier(0.23, 1, 0.32, 1);
+  transition-delay: 0.5s;
+  @apply shadow-lg;
+}
+
+.exit-loader {
+  bottom: 100%;
+}
+
+.loader-wrap svg {
+  position: absolute;
+  top: 0;
+  width: 100vw;
+  height: 110vh;
+  fill: #1a1a1a;
+}
+
+.loader-wrap .loader-wrap-heading .load-text {
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 15px;
+  text-transform: uppercase;
+  z-index: 20;
+}
+
+.loader-text-exit {
+  animation: loaderExit 1s forwards;
+  opacity: 0; /* Start with opacity: 0 */
+  transform: translateY(-60px);
+}
+
+@keyframes loaderExit {
+  0% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  80% {
+    transform: translateY(-60px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px);
+  }
+}
+
+.load-text span {
+  -webkit-animation: loading 1s infinite alternate;
+  animation: loading 1s infinite alternate;
+}
+
+.load-text span:nth-child(1) {
+  -webkit-animation-delay: 0s;
+  animation-delay: 0s;
+}
+
+.load-text span:nth-child(2) {
+  -webkit-animation-delay: 0.1s;
+  animation-delay: 0.1s;
+}
+
+.load-text span:nth-child(3) {
+  -webkit-animation-delay: 0.2s;
+  animation-delay: 0.2s;
+}
+
+.load-text span:nth-child(4) {
+  -webkit-animation-delay: 0.3s;
+  animation-delay: 0.3s;
+}
+
+.load-text span:nth-child(5) {
+  -webkit-animation-delay: 0.4s;
+  animation-delay: 0.4s;
+}
+
+.load-text span:nth-child(6) {
+  -webkit-animation-delay: 0.5s;
+  animation-delay: 0.5s;
+}
+
+.load-text span:nth-child(7) {
+  -webkit-animation-delay: 0.6s;
+  animation-delay: 0.6s;
+}
+
+@-webkit-keyframes loading {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes loading {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

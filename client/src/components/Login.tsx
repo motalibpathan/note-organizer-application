@@ -22,22 +22,23 @@ const LoginModal: React.FC<LoginModalProps> = ({
   const [password, setPassword] = useState<string>("");
   const [authMode, setAuthMode] = useState<AuthMode>(AuthMode.Login);
 
-  const authContext = useAuthContext(); // Access the auth context
+  const { login, register, loading, user, error, setToast } = useAuthContext(); // Access the auth context
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (authMode === AuthMode.Login) {
-      await authContext?.login(email, password);
+      await login(email, password);
     } else {
-      await authContext?.register(username, email, password); // You can set a username here
+      await register(username, email, password); // You can set a username here
     }
+    setToast((prev) => ({ ...prev, message: "Welcome back!", active: true }));
   };
 
-  const isLoading = authContext?.loading || false;
+  const isLoading = loading || false;
 
   return (
     <Modal
-      isOpen={authContext?.user === null ? true : isModalOpen}
+      isOpen={user === null ? true : isModalOpen}
       title={authMode === AuthMode.Login ? "Login" : "Register"}
       onClose={() => setIsModalOpen(false)}
     >
@@ -48,11 +49,7 @@ const LoginModal: React.FC<LoginModalProps> = ({
               ? "Hello! Welcome back"
               : "Create an account"}
           </h4>
-          {authContext?.error && (
-            <div className="text-red-500 text-sm mb-4">
-              {authContext?.error}
-            </div>
-          )}
+          {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
           <form onSubmit={handleSubmit}>
             {authMode === AuthMode.Register && (
               <div className="mb-4">

@@ -34,10 +34,6 @@ exports.updateNote = async (req, res) => {
   try {
     const { id } = req.params;
     const { title, content, category, photos } = req.body;
-    console.log(
-      "🚀 ~ file: noteController.js:36 ~ exports.updateNote= ~ photos:",
-      photos
-    );
 
     // Find the note by its ID in the database
     const existingNote = await Note.findById(id);
@@ -78,12 +74,15 @@ exports.updateNote = async (req, res) => {
 exports.getAllNotes = async (req, res) => {
   try {
     // Fetch all notes from the database
-    console.log(req.userId);
     const allNotes = await Note.find({ user: req.userId }).sort({
       createdAt: -1,
     });
     res.json({ success: true, data: allNotes });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: noteController.js:82 ~ exports.getAllNotes= ~ error:",
+      error
+    );
     // Handle errors during note retrieval
     res.status(500).json({
       success: false,
@@ -107,6 +106,10 @@ exports.getNoteById = async (req, res) => {
     }
     res.json({ success: true, data: note });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: noteController.js:109 ~ exports.getNoteById= ~ error:",
+      error
+    );
     // Handle errors during note retrieval
     res.status(500).json({
       success: false,
@@ -130,6 +133,10 @@ exports.deleteNote = async (req, res) => {
     }
     res.json({ success: true, message: "Note deleted successfully" });
   } catch (error) {
+    console.log(
+      "🚀 ~ file: noteController.js:136 ~ exports.deleteNote ~ error:",
+      error
+    );
     // Handle errors during note deletion
     res.status(500).json({
       success: false,

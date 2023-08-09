@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaEnvelope, FaLock, FaUser } from "react-icons/fa";
 import { useAuthContext } from "../hooks/useAuthContext";
 import Modal from "./Model";
@@ -31,8 +31,13 @@ const LoginModal: React.FC<LoginModalProps> = ({
     } else {
       await register(username, email, password); // You can set a username here
     }
-    setToast((prev) => ({ ...prev, message: "Welcome back!", active: true }));
   };
+
+  useEffect(() => {
+    if (user) {
+      setToast((prev) => ({ ...prev, message: "Welcome back!", active: true }));
+    }
+  }, [user, setToast]);
 
   const isLoading = loading || false;
 

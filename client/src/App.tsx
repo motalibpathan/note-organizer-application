@@ -25,7 +25,7 @@ function App() {
         <p className="text-center mt-3 green_gradient md:w-max mx-auto px-3">
           Organize your note - add image, categorize and more ...
         </p>
-        <div className="md:container mx-auto p-5 md:grid md:grid-cols-3 gap-5">
+        <div className="md:container mx-auto md:p-5 p-2 md:grid md:grid-cols-3 gap-5">
           <div className="col-span-2 md:mb-0 mb-3">
             <NoteForm />
           </div>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BiEdit } from "react-icons/bi";
 import { GoTrash } from "react-icons/go";
 import { Note } from "../contexts/NotesCategoriesContext";
@@ -8,6 +8,7 @@ import NoteForm from "./NoteForm";
 
 interface NoteCardProps {
   note: Note;
+  index: number;
 }
 
 const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
@@ -16,46 +17,66 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const category = categories.find((c) => c._id === note.category);
 
+  const containerCardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (cardRef.current?.clientHeight) {
+      if (cardRef.current?.clientHeight > 140) {
+        containerCardRef.current?.classList.add("vertical");
+      } else {
+        containerCardRef.current?.classList.add("horizontal");
+      }
+    }
+  }, [cardRef]);
+
   const handleModalClose = () => {
     setIsModalOpen(false);
   };
   return (
     <>
-      <div className="rounded-xl backdrop-blur-lg bg-white/5 md:p-5 p-3 relative ">
+      <div
+        ref={containerCardRef}
+        className={`rounded-xl backdrop-blur-lg bg-white/5 relative note-card w-full h-full group`}
+      >
         <div
           onClick={() => setIsModalOpen(true)}
-          className="h-72 overflow-y-auto cursor-pointer"
+          className=" h-full max-h-96 overflow-y-auto p-2 cursor-pointer"
         >
-          <h2 className="text-xl mb-3">{note.title}</h2>
-          <p className="text_color ">{note.content}</p>
-          <div className="pb-5">
-            {note.photos.map((photo, index) => (
-              <img
-                key={index}
-                src={`/api/uploads/${photo.filename}`}
-                alt={photo.originalName}
-                className="w-full my-2"
-              />
-            ))}
+          <div ref={cardRef} className=" ">
+            <h2 className="md:text-xl text-[1rem] mb-3 text-[#aaaaaa]">
+              {note.title}
+            </h2>
+            <p className="text_color md:text-base text-sm">{note.content}</p>
+            <div className="pb-5">
+              {note.photos.map((photo, index) => (
+                <img
+                  key={index}
+                  src={`/api/uploads/${photo.filename}`}
+                  alt={photo.originalName}
+                  className="w-full my-2"
+                />
+              ))}
+            </div>
           </div>
-        </div>
-        <div className="fixed bottom-0 left-0 flex justify-between w-full px-2 bg-black/80 backdrop-blur-xl">
-          <p className="underline blue_gradient cursor-pointer py-1">
-            #{note.category ? category?.name || "no category" : "no category"}
-          </p>
-          <div className="flex gap-2 items-center">
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className=" text-gray-400 text-xl hover:bg-gray-800 rounded-full duration-300 p-1"
-            >
-              <BiEdit />
-            </button>
-            <button
-              onClick={() => setIsDeleteModalOpen(true)}
-              className=" text-gray-400 text-xl hover:bg-gray-800 rounded-full duration-300 p-1 hover:text-red-500"
-            >
-              <GoTrash className="text-[18px]" />
-            </button>
+          <div className="hidden group-hover:flex duration-300 fixed bottom-0 left-0 justify-between w-full px-2 bg-black backdrop-blur-xl">
+            <p className="underline blue_gradient cursor-pointer py-1 text-xs">
+              #{note.category ? category?.name || "no category" : "no category"}
+            </p>
+            <div className="flex gap-2 items-center">
+              <button
+                onClick={() => setIsModalOpen(true)}
+                className=" text-gray-400 text-xl hover:bg-gray-800 rounded-full duration-300 p-1"
+              >
+                <BiEdit className="md:text-[18px] text-[14px]" />
+              </button>
+              <button
+                onClick={() => setIsDeleteModalOpen(true)}
+                className=" text-gray-400 text-xl hover:bg-gray-800 rounded-full duration-300 p-1 hover:text-red-500"
+              >
+                <GoTrash className="md:text-[18px] text-[14px]" />
+              </button>
+            </div>
           </div>
         </div>
       </div>

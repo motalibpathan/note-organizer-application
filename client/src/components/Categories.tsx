@@ -49,8 +49,8 @@ const Categories: React.FC = () => {
   return (
     <>
       <div className="w-full rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-white ">
-        <div className="p-5">
-          <div className="p-5 rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-blue-200">
+        <div className="md:p-5 p-2">
+          <div className="md:p-5 p-2 rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-blue-200">
             <div className="flex justify-between items-center ">
               <div>
                 <div className="w-9 h-1 bg-yellow-500 rounded mb-2"></div>
@@ -58,7 +58,7 @@ const Categories: React.FC = () => {
               </div>
               <button
                 onClick={handleAddCategory}
-                className="py-1 px-3 bg-yellow-300 text-black font-bold rounded-md"
+                className="py-1 px-3 bg-yellow-300 text-black font-bold rounded-md text-sm"
               >
                 Add
               </button>

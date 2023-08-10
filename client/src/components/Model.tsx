@@ -35,7 +35,7 @@ const Modal = ({ isOpen, onClose, title, children }: ModelProps) => {
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: 20, opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="bg-black/80 w-full md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 p-4 rounded-lg shadow-lg relative z-10 mx-3"
+            className="bg-black/80 w-full md:w-2/3 lg:w-1/2 xl:w-1/3 2xl:w-1/4 md:p-4 p-2 rounded-lg shadow-lg relative z-10 mx-3"
           >
             <div className="flex justify-between">
               <div>

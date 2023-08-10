@@ -7,11 +7,11 @@ const NoteList: React.FC = () => {
 
   return (
     <>
-      <div className="container mx-auto p-5">
-        <h3 className="text-3xl font-bold mb-5">Notes</h3>
-        <div className="grid md:grid-cols-3 grid-cols-1 gap-5">
-          {notes.map((note) => (
-            <NoteCard key={note._id} note={note} />
+      <div className="container mx-auto md:p-5 p-2">
+        <h3 className="md:text-3xl text-xl font-bold mb-5">Notes</h3>
+        <div className="note-container">
+          {notes.map((note, index) => (
+            <NoteCard key={note._id} note={note} index={index} />
           ))}
         </div>
       </div>

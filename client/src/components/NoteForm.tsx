@@ -1,6 +1,6 @@
-import React, { useId, useState } from "react";
+import React, { useEffect, useId, useRef, useState } from "react";
+import { BiImageAdd } from "react-icons/bi";
 import { BsCloudCheck } from "react-icons/bs";
-import { FiUpload } from "react-icons/fi";
 import { PiSpinnerGapBold } from "react-icons/pi";
 import { TfiClose } from "react-icons/tfi";
 import { Note } from "../contexts/NotesCategoriesContext";
@@ -111,13 +111,24 @@ const NoteForm: React.FC<NoteFormProps> = ({
     handleModalClose && handleModalClose();
   };
 
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
+
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto"; // Reset height
+      textareaRef.current.style.height = `${
+        textareaRef.current.scrollHeight + 20
+      }px`;
+    }
+  }, [formData]);
+
   return (
     <>
       <div className="w-full rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-white">
-        <div className={`${editMode ? "p-0" : "p-5"} overflow-hidden`}>
+        <div className={`${editMode ? "p-0" : "md:p-5"} p-2 overflow-hidden`}>
           <form
             onSubmit={(e) => handleSaveNote(e)}
-            className="p-5 rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-blue-200 overflow-y-auto max-h-[500px]"
+            className="md:p-5 p-2 rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-blue-200 overflow-y-auto max-h-[500px]"
           >
             <div className="flex justify-between relative">
               {!editMode ? (
@@ -136,7 +147,9 @@ const NoteForm: React.FC<NoteFormProps> = ({
                 </>
               ) : null}
               <div
-                className={`absolute ${editMode ? "-top-4 " : "top-5"} right-0`}
+                className={`absolute ${
+                  editMode ? "-top-4 " : "top-5"
+                } right-0 md:text-base text-sm text_color`}
               >
                 {uploading || updating ? (
                   <div className="text_color flex items-center gap-2">
@@ -151,55 +164,43 @@ const NoteForm: React.FC<NoteFormProps> = ({
                 )}
               </div>
             </div>
-            <input
-              value={formData.title}
-              onChange={handleChange}
-              name="title"
-              className="py-2 px-3 border-b border-gray-400 bg-transparent w-full outline-none placeholder:text-[#676767]"
-              type="text"
-              placeholder="Note Title"
-              required
-            />
+            <div className="flex gap-2 justify-between items-center">
+              <div className="flex-1">
+                <input
+                  value={formData.title}
+                  onChange={handleChange}
+                  name="title"
+                  className="py-2 px-3 bg-transparent w-full outline-none placeholder:text-[#676767] text-[#aaaaaa]"
+                  type="text"
+                  placeholder="Note Title"
+                  required
+                />
+              </div>
+
+              {/* Category Dropdown */}
+              <select
+                value={formData.category}
+                onChange={handleChange}
+                name="category"
+                className="py-2 px-3 bg-transparent w-32 outline-none mt-2 text_color rounded-md border border-gray-600 text-sm text-[#aaaaaa]"
+              >
+                <option value="">Category</option>
+                {/* Render categories dynamically based on data */}
+                {/* Example: */}
+                {categories.map((category) => (
+                  <option key={category._id} value={category._id}>
+                    {category.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <textarea
               value={formData.content}
               onChange={handleChange}
+              ref={textareaRef}
               name="content"
-              rows={3}
-              className="py-2 px-3 border-b border-gray-400 bg-transparent w-full outline-none mt-2 placeholder:text-[#676767]"
+              className="py-2 px-3 bg-transparent w-full outline-none mt-2 placeholder:text-[#676767] text-[#aaaaaa]"
               placeholder="Note content"
-            ></textarea>
-
-            {/* Category Dropdown */}
-            <select
-              value={formData.category}
-              onChange={handleChange}
-              name="category"
-              className="py-2 px-3 border-b border-gray-400 bg-transparent w-full outline-none mt-2 text_color"
-            >
-              <option value="">Select Category</option>
-              {/* Render categories dynamically based on data */}
-              {/* Example: */}
-              {categories.map((category) => (
-                <option key={category._id} value={category._id}>
-                  {category.name}
-                </option>
-              ))}
-            </select>
-
-            {/* Image Upload */}
-            <label
-              htmlFor={id}
-              className="ml-3 cursor-pointer mt-3 block text_color"
-            >
-              <FiUpload className="mr-2 inline-block" /> Link photos
-            </label>
-            <input
-              type="file"
-              accept="image/*"
-              multiple
-              onChange={handleFileChange}
-              id={id}
-              className="hidden"
             />
 
             {selectedFiles.map((file, index) => (
@@ -232,12 +233,28 @@ const NoteForm: React.FC<NoteFormProps> = ({
                 ))}
               </div>
             )}
-
-            <div className="flex justify-end mt-3">
-              <button className="bg-green-500 py-2 px-7 text-black rounded-md hover:bg-transparent border border-green-500 hover:text-green-500 duration-300 font-bold">
-                Save
-                {/* Button text based on _id */}
-              </button>
+            <div className="flex justify-end items-center gap-2">
+              {/* Image Upload */}
+              <label
+                htmlFor={id}
+                className=" text-gray-400 hover:bg-gray-700 rounded-full duration-300 flex justify-center items-center h-7 w-7 cursor-pointer"
+              >
+                <BiImageAdd className="inline-block text-xl" />
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={handleFileChange}
+                id={id}
+                className="hidden"
+              />
+              <div className="flex justify-end ">
+                <button className="bg-green-500 py-1.5 px-5 text-black rounded-md hover:bg-transparent border border-green-500 hover:text-green-500 duration-300 font-bold md:text-xs text-xs">
+                  Save
+                  {/* Button text based on _id */}
+                </button>
+              </div>
             </div>
           </form>
         </div>

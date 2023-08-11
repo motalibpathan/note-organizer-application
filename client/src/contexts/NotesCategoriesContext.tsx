@@ -79,7 +79,7 @@ export const NotesCategoriesProvider: React.FC<{
     totalPage: 10,
   });
 
-  const { user, setToast } = useAuthContext();
+  const { user, setToast, logout } = useAuthContext();
 
   const fetchNoteData = useCallback(
     async ({
@@ -98,6 +98,9 @@ export const NotesCategoriesProvider: React.FC<{
 
       try {
         const notesResponse = await fetch(`/api/notes?${queryParams}`);
+        if (notesResponse.status === 401) {
+          logout();
+        }
         const notesData = await notesResponse.json();
 
         if (notesData.success) {
@@ -117,6 +120,7 @@ export const NotesCategoriesProvider: React.FC<{
         setNoteLoading(false);
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [pagination.perPage] // Add any other dependencies if needed
   );
 

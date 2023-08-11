@@ -22,7 +22,11 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
 
   useEffect(() => {
     if (cardRef.current?.clientHeight) {
-      if (cardRef.current?.clientHeight > 140) {
+      console.log(
+        "🚀 ~ file: NoteCard.tsx:25 ~ useEffect ~ cardRef.current?.clientHeight:",
+        cardRef.current?.clientHeight
+      );
+      if (cardRef.current?.clientHeight > 150) {
         containerCardRef.current?.classList.add("vertical");
       } else {
         containerCardRef.current?.classList.add("horizontal");
@@ -39,11 +43,12 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
         ref={containerCardRef}
         className={`rounded-xl backdrop-blur-lg bg-white/5 relative note-card w-full h-full group`}
       >
-        <div
-          onClick={() => setIsModalOpen(true)}
-          className=" h-full max-h-96 overflow-y-auto p-2 cursor-pointer"
-        >
-          <div ref={cardRef} className=" ">
+        <div className=" h-full max-h-96 overflow-y-auto p-2 ">
+          <div
+            onClick={() => setIsModalOpen(true)}
+            ref={cardRef}
+            className="cursor-pointer "
+          >
             <h2 className="md:text-xl text-[1rem] mb-3 text-[#aaaaaa]">
               {note.title}
             </h2>

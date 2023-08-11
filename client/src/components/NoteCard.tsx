@@ -59,7 +59,7 @@ const NoteCard: React.FC<NoteCardProps> = ({ note }) => {
               ))}
             </div>
           </div>
-          <div className="hidden group-hover:flex duration-300 fixed bottom-0 left-0 justify-between w-full px-2 bg-black backdrop-blur-xl">
+          <div className="md:hidden group-hover:flex duration-300 fixed bottom-0 left-0 justify-between w-full px-2 bg-black backdrop-blur-xl">
             <p className="underline blue_gradient cursor-pointer py-1 text-xs">
               #{note.category ? category?.name || "no category" : "no category"}
             </p>

@@ -69,20 +69,47 @@ exports.updateNote = async (req, res) => {
   }
 };
 
-// @desc    Get all notes
+// @desc    Get filtered and paginated notes with search
 // @route   GET /api/notes
-exports.getAllNotes = async (req, res) => {
+exports.getAllNotesWithFilters = async (req, res) => {
+  const perPage = 10; // Number of notes per page
+  const page = parseInt(req.query.page) || 1; // Current page
+  const searchText = req.query.searchText || ""; // Search text from query
+  const categoryId = req.query.categoryId || null; // Category ID from query
+
+  const query = {
+    user: req.userId,
+    $or: [
+      { title: { $regex: searchText, $options: "i" } },
+      { content: { $regex: searchText, $options: "i" } },
+    ],
+  };
+
+  if (categoryId) {
+    query.category = categoryId;
+  }
+
   try {
-    // Fetch all notes from the database
-    const allNotes = await Note.find({ user: req.userId }).sort({
-      createdAt: -1,
+    // Fetch filtered and paginated notes from the database
+    const filteredNotes = await Note.find(query)
+      .sort({ createdAt: -1 })
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+
+    // Count total number of matching notes
+    const totalCount = await Note.countDocuments(query);
+
+    res.json({
+      success: true,
+      data: filteredNotes,
+      pagination: {
+        total: totalCount,
+        current: page,
+        perPage,
+      },
     });
-    res.json({ success: true, data: allNotes });
   } catch (error) {
-    console.log(
-      "🚀 ~ file: noteController.js:82 ~ exports.getAllNotes= ~ error:",
-      error
-    );
+    console.log("Error fetching notes:", error);
     // Handle errors during note retrieval
     res.status(500).json({
       success: false,

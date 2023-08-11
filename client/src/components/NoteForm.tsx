@@ -124,8 +124,8 @@ const NoteForm: React.FC<NoteFormProps> = ({
 
   return (
     <>
-      <div className="w-full rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-white">
-        <div className={`${editMode ? "p-0" : "md:p-5"} p-2 overflow-hidden`}>
+      <div className="w-full rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-white ">
+        <div className={`${editMode ? "p-0" : " md:p-3 "} p-2 overflow-hidden`}>
           <form
             onSubmit={(e) => handleSaveNote(e)}
             className="md:p-5 p-2 rounded-2xl backdrop-blur-3xl bg-opacity-5 bg-blue-200 overflow-y-auto max-h-[500px]"
@@ -134,49 +134,20 @@ const NoteForm: React.FC<NoteFormProps> = ({
               {!editMode ? (
                 <>
                   <div>
-                    <div className="w-9 h-1 bg-green-500 rounded mb-2"></div>
-                    <h3 className="mb-3 text-lg">Create New Note</h3>
+                    <div className="w-9 h-1 bg-green-500 rounded "></div>
+                    <h3 className=" text-lg">Create New Note</h3>
                   </div>
-                  <div className="">
-                    <div className="flex gap-2 mb-2">
-                      <div className="w-3 h-3 bg-green-500 rounded-full mx-auto"></div>
-                      <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto"></div>
-                      <div className="w-3 h-3 bg-red-500 rounded-full mx-auto"></div>
-                    </div>
+
+                  <div className="flex gap-2">
+                    <div className="w-3 h-3 bg-green-500 rounded-full mx-auto"></div>
+                    <div className="w-3 h-3 bg-yellow-500 rounded-full mx-auto"></div>
+                    <div className="w-3 h-3 bg-red-500 rounded-full mx-auto"></div>
                   </div>
                 </>
               ) : null}
-              <div
-                className={`absolute ${
-                  editMode ? "-top-4 " : "top-5"
-                } right-0 md:text-base text-sm text_color`}
-              >
-                {uploading || updating ? (
-                  <div className="text_color flex items-center gap-2">
-                    <span>Saving</span>
-                    <PiSpinnerGapBold className="animate-spin text-lg" />{" "}
-                  </div>
-                ) : (
-                  <div className="text_color flex items-center gap-2">
-                    <span>Saved</span>
-                    <BsCloudCheck />
-                  </div>
-                )}
-              </div>
             </div>
-            <div className="flex gap-2 justify-between items-center">
-              <div className="flex-1">
-                <input
-                  value={formData.title}
-                  onChange={handleChange}
-                  name="title"
-                  className="py-2 px-3 bg-transparent w-full outline-none placeholder:text-[#676767] text-[#aaaaaa]"
-                  type="text"
-                  placeholder="Note Title"
-                  required
-                />
-              </div>
 
+            <div className="flex justify-between items-center gap-2">
               {/* Category Dropdown */}
               <select
                 value={formData.category}
@@ -193,13 +164,41 @@ const NoteForm: React.FC<NoteFormProps> = ({
                   </option>
                 ))}
               </select>
+
+              <div className={` md:text-base text-sm text_color`}>
+                {uploading || updating ? (
+                  <div className="text_color flex items-center gap-2">
+                    <span>Saving</span>
+                    <PiSpinnerGapBold className="animate-spin text-lg" />{" "}
+                  </div>
+                ) : (
+                  <div className="text_color flex items-center gap-2">
+                    <span>Saved</span>
+                    <BsCloudCheck />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="flex gap-2 justify-between items-center">
+              <div className="flex-1">
+                <input
+                  value={formData.title}
+                  onChange={handleChange}
+                  name="title"
+                  className="py-2 bg-transparent w-full outline-none placeholder:text-[#676767] text-[#aaaaaa]"
+                  type="text"
+                  placeholder="Note Title"
+                  required
+                />
+              </div>
             </div>
             <textarea
               value={formData.content}
               onChange={handleChange}
               ref={textareaRef}
               name="content"
-              className="py-2 px-3 bg-transparent w-full outline-none mt-2 placeholder:text-[#676767] text-[#aaaaaa]"
+              className="py-2 bg-transparent w-full outline-none mt-2 placeholder:text-[#676767] text-[#aaaaaa]"
               placeholder="Note content"
             />
 
@@ -250,7 +249,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
                 className="hidden"
               />
               <div className="flex justify-end ">
-                <button className="bg-green-500 py-1.5 px-5 text-black rounded-md hover:bg-transparent border border-green-500 hover:text-green-500 duration-300 font-bold md:text-xs text-xs">
+                <button className="py-1 px-3 bg-green-500 hover:bg-transparent border hover:text-green-500 border-green-500 text-black font-bold rounded-md text-sm duration-300">
                   Save
                   {/* Button text based on _id */}
                 </button>

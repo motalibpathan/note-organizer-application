@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 import { useAuthContext } from "../hooks/useAuthContext";
 
 export interface Note {
@@ -23,6 +23,7 @@ interface NotesCategoriesContextType {
   uploading: boolean;
   updating: boolean;
   deleting: boolean;
+  pagination: Pagination;
   addNote: (note: Note, stateUpdate: boolean) => Promise<Note>;
   editNote: (note: Note, stateUpdate: boolean) => void;
   deleteNote: (noteId: string) => Promise<{ success: boolean } | undefined>;
@@ -35,6 +36,23 @@ interface NotesCategoriesContextType {
   deleteCategory: (
     categoryId: string
   ) => Promise<{ success: boolean } | undefined>;
+  fetchNoteData: ({
+    searchText,
+    categoryId,
+    page,
+  }: FetchNoteDataOptions) => Promise<void>;
+}
+
+interface Pagination {
+  total: number;
+  current: number;
+  perPage: number;
+}
+
+interface FetchNoteDataOptions {
+  searchText?: string;
+  categoryId?: string | null;
+  page?: number;
 }
 
 export const NotesCategoriesContext = createContext<
@@ -53,30 +71,54 @@ export const NotesCategoriesProvider: React.FC<{
   const [updating, setUpdating] = useState<boolean>(false);
   const [deleting, setDeleting] = useState<boolean>(false);
 
+  const [pagination, setPagination] = useState<Pagination>({
+    total: 0,
+    current: 0,
+    perPage: 10, // Adjust this as needed
+  });
+
   const { user, setToast } = useAuthContext();
 
-  useEffect(() => {
-    fetchNoteData();
-    fetchCategoryData();
-  }, [user]);
+  const fetchNoteData = useCallback(
+    async ({
+      searchText = "",
+      categoryId = null,
+      page = 1,
+    }: FetchNoteDataOptions) => {
+      setNoteLoading(true);
+      setError(null);
 
-  const fetchNoteData = async () => {
-    setNoteLoading(true);
-    setError(null);
+      const queryParams = new URLSearchParams({
+        searchText,
+        categoryId: categoryId || "",
+        page: page.toString(),
+      });
 
-    try {
-      const notesResponse = await fetch("/api/notes");
-      const notesData = await notesResponse.json();
+      try {
+        const notesResponse = await fetch(`/api/notes?${queryParams}`);
+        const notesData = await notesResponse.json();
 
-      if (notesData.success) {
-        setNotes(notesData.data);
+        if (notesData.success) {
+          setNotes(notesData.data);
+          setPagination({
+            total: notesData.total,
+            current: page,
+            perPage: pagination.perPage,
+          });
+        }
+      } catch (error) {
+        setError("Error fetching notes and categories.");
+      } finally {
+        setNoteLoading(false);
       }
-    } catch (error) {
-      setError("Error fetching notes and categories.");
-    } finally {
-      setNoteLoading(false);
-    }
-  };
+    },
+    [pagination.perPage] // Add any other dependencies if needed
+  );
+
+  useEffect(() => {
+    fetchNoteData({});
+    fetchCategoryData();
+  }, [user, fetchNoteData]);
 
   const fetchCategoryData = async () => {
     setCategoryLoading(true);
@@ -309,6 +351,8 @@ export const NotesCategoriesProvider: React.FC<{
         addCategory,
         editCategory,
         deleteCategory,
+        pagination, // Include pagination data in the context
+        fetchNoteData,
       }}
     >
       {children}

@@ -1,6 +1,6 @@
 const {
   deleteNote,
-  getAllNotes,
+  getAllNotesWithFilters,
   getNoteById,
   updateNote,
   createNote,
@@ -23,7 +23,7 @@ router.post("/", createNote);
  * @desc    Get all notes
  * @return  {object[]} An array of all notes in the response body
  */
-router.get("/", getAllNotes);
+router.get("/", getAllNotesWithFilters);
 
 /**
  * @route   GET /api/notes/:id

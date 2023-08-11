@@ -47,6 +47,7 @@ interface Pagination {
   total: number;
   current: number;
   perPage: number;
+  totalPage: number;
 }
 
 interface FetchNoteDataOptions {
@@ -75,6 +76,7 @@ export const NotesCategoriesProvider: React.FC<{
     total: 0,
     current: 0,
     perPage: 10, // Adjust this as needed
+    totalPage: 10,
   });
 
   const { user, setToast } = useAuthContext();
@@ -101,9 +103,12 @@ export const NotesCategoriesProvider: React.FC<{
         if (notesData.success) {
           setNotes(notesData.data);
           setPagination({
-            total: notesData.total,
-            current: page,
+            total: notesData.pagination.total,
+            current: notesData.pagination.current,
             perPage: pagination.perPage,
+            totalPage: Math.ceil(
+              notesData.pagination.total / pagination.perPage
+            ),
           });
         }
       } catch (error) {

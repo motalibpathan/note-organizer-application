@@ -295,3 +295,9 @@ body {
 .vertical {
   grid-row: span 2;
 }
+
+@media (max-width: 767px) {
+  .note-container {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}

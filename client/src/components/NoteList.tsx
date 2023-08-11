@@ -3,7 +3,7 @@ import { useNotesCategoriesContext } from "../hooks/useNotesCategoriesContext";
 import NoteCard from "./NoteCard";
 
 const NoteList: React.FC = () => {
-  const { notes, fetchNoteData, noteLoading, categories } =
+  const { notes, fetchNoteData, noteLoading, categories, pagination } =
     useNotesCategoriesContext();
 
   const [searchText, setSearchText] = useState("");
@@ -42,12 +42,13 @@ const NoteList: React.FC = () => {
       page: newPage,
     });
   };
+
   return (
     <div className="container mx-auto md:p-5 p-2">
       <h3 className="md:text-3xl text-xl font-bold mb-5">Notes</h3>
       {/* Search and filter UI */}
 
-      <div className="mb-3 flex gap-2 justify-end">
+      <div className="mb-3 flex flex-wrap gap-2 justify-end">
         <input
           type="text"
           placeholder="Search..."
@@ -69,33 +70,59 @@ const NoteList: React.FC = () => {
         </select>
       </div>
 
-      <div className="min-h-screen">
-        {noteLoading && <p>Loading</p>}
-        {/* Note cards */}
-        {!noteLoading && (
-          <div className="note-container grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="min-h-[300px]">
+        {noteLoading ? (
+          <div className="note-container gap-2 ">
+            {[...new Array(10)].map((_, index) => (
+              <div
+                key={index}
+                className="note-card h-52 w-full backdrop-blur-xl bg-black/30 border border-gray-900 shadow-lg rounded-md p-2 "
+              >
+                <p className="w-[99%] py-2 rounded-xl  bg-[#1c1c1c] skeleton-box "></p>
+                <p className="h-36 w-full py-2 rounded-md bg-[#1c1c1c] skeleton-box "></p>
+                <div className="flex justify-between">
+                  <p className="h-2 w-14 py-2 rounded-md bg-[#1c1c1c] skeleton-box "></p>
+                  <div className="flex gap-3">
+                    <span className="h-4 w-4 py-2 rounded-full bg-[#1c1c1c] skeleton-box "></span>
+                    <span className="h-4 w-4 py-2 rounded-full bg-[#1c1c1c] skeleton-box "></span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="note-container ">
             {notes.map((note, index) => (
               <NoteCard key={note._id} note={note} index={index} />
             ))}
           </div>
         )}
 
-        <div className="flex gap-3 justify-end text_color">
+        <div className="flex gap-3 justify-end text_color mt-3 text-sm">
           <button
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 1}
-            className="py-2 px-3 border border-gray-700 rounded-md "
+            className="py-2 px-3 border border-gray-700 rounded-md hover:bg-gray-100 cursor-pointer duration-300 disabled:cursor-not-allowed"
           >
-            Previous
+            Prev
           </button>
-          <span className="py-2 px-3 border border-gray-700 rounded-md ">
-            {" "}
-            {currentPage}
-          </span>
+          {[...new Array(pagination.totalPage)].map((_, index) => (
+            <button
+              onClick={() => handlePageChange(index + 1)}
+              key={index}
+              disabled={index + 1 === pagination.current}
+              className={`py-2 px-3 border border-gray-700 rounded-md hover:bg-gray-100 cursor-pointer duration-300 ${
+                index + 1 === pagination.current && "bg-gray-100"
+              } disabled:cursor-not-allowed`}
+            >
+              {index + 1}
+            </button>
+          ))}
+
           <button
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={notes.length < 10} // Adjust based on API response
-            className="py-2 px-3 border rounded-md  border-gray-700"
+            className="py-2 px-3 border rounded-md  border-gray-700 hover:bg-gray-100 cursor-pointer duration-300 disabled:cursor-not-allowed"
           >
             Next
           </button>

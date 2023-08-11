@@ -1,8 +1,8 @@
 import React, { useEffect, useId, useRef, useState } from "react";
 import { BiImageAdd } from "react-icons/bi";
 import { BsCloudCheck } from "react-icons/bs";
+import { HiOutlineTrash } from "react-icons/hi";
 import { PiSpinnerGapBold } from "react-icons/pi";
-import { TfiClose } from "react-icons/tfi";
 import { Note } from "../contexts/NotesCategoriesContext";
 import { useNotesCategoriesContext } from "../hooks/useNotesCategoriesContext";
 import ImageUploadItem from "./ImageUploadItem";
@@ -79,6 +79,7 @@ const NoteForm: React.FC<NoteFormProps> = ({
       ...prev,
       photos: [...prev.photos, { filename, originalName }],
     }));
+
     setSelectedFiles([]);
   };
 
@@ -202,6 +203,34 @@ const NoteForm: React.FC<NoteFormProps> = ({
               placeholder="Note content"
             />
 
+            {/* Display existing photos */}
+            {formData.photos.length > 0 && (
+              <div
+                className={`mt-4 flex-wrap gap-4 ${
+                  editMode ? "block" : "flex"
+                }`}
+              >
+                {formData.photos.map((preview, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={`/api/uploads/${preview.filename}`}
+                      alt={`Uploaded Preview ${index + 1}`}
+                      className={`w-48 h-48 object-cover rounded-lg  ${
+                        editMode ? "w-full h-auto mb-3" : " "
+                      }`}
+                    />
+                    <div
+                      onClick={() => handleRemove(preview)}
+                      className="w-6 h-6 bg-black rounded-full mx-auto text-xs flex items-center justify-center cursor-pointer text-white absolute top-1 right-1 "
+                      title="Remove"
+                    >
+                      <HiOutlineTrash />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
             {selectedFiles.map((file, index) => (
               <ImageUploadItem
                 key={index}
@@ -210,28 +239,6 @@ const NoteForm: React.FC<NoteFormProps> = ({
                 onUploadSuccess={onUploadComplete}
               />
             ))}
-
-            {/* Display existing photos */}
-            {formData.photos.length > 0 && (
-              <div className="mt-4 flex flex-wrap gap-4">
-                {formData.photos.map((preview, index) => (
-                  <div key={index} className="relative">
-                    <img
-                      src={`/api/uploads/${preview.filename}`}
-                      alt={`Uploaded Preview ${index + 1}`}
-                      className="w-48 h-48 object-cover rounded-lg"
-                    />
-                    <div
-                      onClick={() => handleRemove(preview)}
-                      className="w-4 h-4 bg-black rounded-full mx-auto text-xs flex items-center justify-center cursor-pointer text-white absolute top-1 right-1 "
-                      title="Remove"
-                    >
-                      <TfiClose />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
             <div className="flex justify-end items-center gap-2">
               {/* Image Upload */}
               <label
